@@ -162,27 +162,35 @@
          (pos (if (and pos exclude-first) (+ pos 1) pos)))
     (if pos (subseq str pos) foundp)))
 
-(defun reduce-leaves (func input-data &key (key #'identity))
+(defun reduce-leaves (func input-data
+                           &key
+                           (key #'identity)
+                           (ignore-nil t)
+                           (initial-value nil initial-value-p)
+                           &aux
+                           (acc initial-value)
+                           (first-val-p initial-value-p))
   "Reduce but for atoms in data structure and nested data structures."
   (labels
-    ((reduce-main (data)
+    ((update-value (data-atom)
+       (let ((result (funcall key data-atom)))
+         (if first-val-p
+             (setf acc (funcall func acc result))
+             (setf acc result))
+         (setf first-val-p t)))
+     (reduce-main (data)
        (typecase data
-         (null
-           (funcall key nil))
-         (string
-           (funcall key data))
-         (vector
-           (reduce func data :key #'reduce-main))
-         (cons
-           (funcall func (reduce-main (car data))
-                    (reduce-main (cdr data))))
+         (null   (unless ignore-nil
+                   (update-value nil)))
+         (string (update-value data))
+         (vector (map nil #'reduce-main data))
+         (cons   (mapc #'reduce-main data))
          (hash-table
            (loop for value being the hash-values of data
-                 for acc = (funcall func (reduce-main value))
-                 then      (funcall func acc (reduce-main value))
-                 finally (return acc)))
-         (t (funcall key data)))))
-    (reduce-main input-data)))
+                 do (reduce-main value)))
+         (t (update-value data)))))
+    (reduce-main input-data)
+    acc))
 
 (defun get-leaves (input-data)
   "Returns list of atoms in data structure and nested data structures."
