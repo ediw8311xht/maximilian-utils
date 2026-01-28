@@ -1,4 +1,4 @@
-(in-package :my-utils)
+(in-package :maximilian-utils)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun defstruct-option-parse (name-and-options)
@@ -194,6 +194,6 @@
 
 (defun get-file-type (input-file)
   (intern
-    (string-upcase (my-utils:subseq-after input-file #\. :from-end t :exclude-first 1))
+    (string-upcase (subseq-after input-file #\. :from-end t :exclude-first 1))
     "KEYWORD"))
 

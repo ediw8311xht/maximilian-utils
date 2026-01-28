@@ -1,4 +1,4 @@
-# my-utils
+# maximilian-utils
 
 
 

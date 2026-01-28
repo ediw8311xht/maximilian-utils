@@ -1,5 +1,5 @@
 
-(defpackage :my-utils
+(defpackage :maximilian-utils
   (:use :cl)
   (:export
     #:alistp
