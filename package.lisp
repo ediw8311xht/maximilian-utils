@@ -4,19 +4,18 @@
   (:export
     #:alistp
     #:assoc-val
+    #:count-leaves
     #:defstruct-with-helpers
     #:format-combine
+    #:get-file-type
+    #:get-leaves
     #:gethash-init
     #:join
     #:join-symbols
+    #:pipe
+    #:reduce-leaves
     #:return-nil
     #:show-structure
     #:split-by-char
-    #:substr-count
     #:subseq-after
-    #:reduce-leaves
-    #:get-leaves
-    #:count-leaves
-    #:get-file-type))
-
-
+    #:substr-count))

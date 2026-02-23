@@ -89,6 +89,13 @@
            (setf (gethash ,e-key ,e-hash-table)
                  (progn ,@set-form))))))
 
+(defmacro pipe (&body function-calls)
+  (loop for x in (cdr function-calls)
+        with return-function = (car function-calls)
+        do (setf return-function (append x (list return-function)))
+        finally (return return-function)
+        ))
+
 (defun split-by-char (str &key (split-char #\,))
   (loop for c across (format nil "~a~c" str split-char)
         for i from 0
