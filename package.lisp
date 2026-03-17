@@ -13,6 +13,7 @@
     #:join
     #:join-symbols
     #:pipe
+    #:pipe-arrow
     #:reduce-leaves
     #:return-nil
     #:show-structure

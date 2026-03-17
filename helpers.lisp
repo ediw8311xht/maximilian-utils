@@ -59,6 +59,7 @@
       ;; create helper functions
       (dolist (slot slots)
         (multiple-value-bind (slot-name type) (slot-name-type slot)
+          (declare (ignore type))
           (let ((find-funcname (intern (format nil "~A~A-FIND" cname slot-name)))
                 (func-accessor (intern (format nil "~A~A" cname slot-name))))
             (push
@@ -93,16 +94,26 @@
   (loop for x in (cdr function-calls)
         with return-function = (car function-calls)
         do (setf return-function (append x (list return-function)))
-        finally (return return-function)
-        ))
+        finally (return return-function)))
+
+(defmacro pipe-arrow (&body body)
+  (loop for i in body
+        with results = nil and current = nil
+        if (eq i '>>)
+          do  (setf results (list (append current results)))
+              (setf current nil)
+        else
+          do (push i current)
+        finally (return (append (reverse current) results))))
 
 (defun split-by-char (str &key (split-char #\,))
   (loop for c across (format nil "~a~c" str split-char)
         for i from 0
         with s = 0
         when (char= c split-char)
-        collect (subseq str s i)
-        and do (setf s (+ 1 i))))
+          collect (subseq str s i)
+          and
+          do (setf s (+ 1 i))))
 
 (defun substr-count (str sub &optional (len (length sub)) (pos (- (length str) len)))
   (if (> 0 pos)
@@ -113,14 +124,14 @@
              0))))
 
 (defun format-combine (&optional s &rest rest)
-  (if (not s)
-      ""
+  (if s
       (loop with arg with rest-args = rest
             repeat (substr-count s "~A")
             do (setf (values arg rest-args)
                      (apply #'format-combine rest-args))
             collect arg into args
-            finally (return (values (apply #'format nil s args) rest-args)))))
+            finally (return (values (apply #'format nil s args) rest-args)))
+      ""))
 
 (defun assoc-val (symbol assoc-list)
   (let ((key-val (assoc symbol assoc-list)))
@@ -164,10 +175,13 @@
            (alistp (rest alist)))
       t))
 
-(defun subseq-after (str character &key (foundp nil) (from-end nil) (exclude-first nil))
-  (let* ((pos (position character str :from-end from-end))
-         (pos (if (and pos exclude-first) (+ pos 1) pos)))
-    (if pos (subseq str pos) foundp)))
+(defun subseq-after (str character
+                         &key (foundp nil)
+                         (from-end nil)
+                         (exclude-first nil))
+  (let* ((pos (position character str :from-end from-end)))
+    (if pos (subseq str (if exclude-first (+ pos 1) pos))
+        foundp)))
 
 (defun reduce-leaves (func input-data
                            &key
