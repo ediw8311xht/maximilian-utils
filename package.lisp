@@ -4,6 +4,8 @@
   (:export
     #:alistp
     #:assoc-val
+    #:bind
+    #:bind-places
     #:count-leaves
     #:defstruct-with-helpers
     #:format-combine
@@ -19,4 +21,6 @@
     #:show-structure
     #:split-by-char
     #:subseq-after
-    #:substr-count))
+    #:substr-count
+    #:λ
+    ))

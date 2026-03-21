@@ -1,5 +1,8 @@
 (in-package :maximilian-utils)
 
+(defmacro λ (&body body)
+  `(lambda ,@body))
+
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun defstruct-option-parse (name-and-options)
     (if (consp name-and-options)
@@ -105,6 +108,29 @@
         else
           do (push i current)
         finally (return (append (reverse current) results))))
+
+(defun bind (func &rest bind-args)
+  (lambda (&rest rest-args)
+    (apply func (append rest-args bind-args))))
+
+
+(defmacro bind-places (func args &key (sep '_) &aux (f (gensym)))
+  "Partially apply function setting arguments to specific places.
+  Arguments matching &sep (default _) are to be recieved when returned function is called.
+  
+  Example: (let ((a (bind-places #'format (_ \"~A\" _))))
+             (funcall a nil \"HI\")) ; ->  \"HI\""
+  (loop for x in args
+        for y = (gensym)
+        if (eq x sep)
+          collect y into unbound
+        else
+          collect (list y x) into bound
+        collect y into complete-args
+        finally (return `(let (,@bound (,f ,func))
+                           (lambda (,@unbound)
+                             (funcall ,f ,@complete-args))))))
+
 
 (defun split-by-char (str &key (split-char #\,))
   (loop for c across (format nil "~a~c" str split-char)
