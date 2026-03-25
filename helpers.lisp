@@ -1,53 +1,66 @@
 (in-package :maximilian-utils)
 
-(defmacro λ (&body body)
-  `(lambda ,@body))
-
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun defstruct-option-parse (name-and-options)
     (if (consp name-and-options)
         (destructuring-bind (name . options) name-and-options
-          (values name
-                  (loop for (k v) on options
-                        when  (and (listp k) (keywordp (car k)))
-                        collect k
-                        when (keywordp k)
-                        collect `(,k ,v))))
-        (values name-and-options '()))))
+          (values name (loop for (k v) on options
+                             when  (and (listp k) (keywordp (car k)))
+                             collect k
+                             when (keywordp k)
+                             collect `(,k ,v))))
+        (values name-and-options '())))
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
+
   (defun slot-name-type (slot-definition)
     (typecase slot-definition
       (atom (values slot-definition nil))
-      (list (let ((plist
-                    (or (and (keywordp (second slot-definition)) (rest slot-definition))
-                        (cddr slot-definition)))) ; when slot contains default value
-              (values (first slot-definition) (getf plist :type)))))))
+      (list (let ((plist (or (and (keywordp (second slot-definition))
+                                  (rest slot-definition))
+                             (cddr slot-definition)))) ; when slot contains default value
+              (values (first slot-definition) (getf plist :type))))))
+  (defun remove-options (options to-remove)
+    (delete-if #'(lambda (opt) (find (car opt) to-remove))
+               options))
+  )
 
 (defmacro defstruct-with-helpers (name-and-options &body body)
   "Creates structure with function structname-slot-find for each slot.
 
-  structname-slot-find: takes input list and struct returning tail of list of first matching
-  element on slot
+structname-slot-find: takes input list and struct returning tail of list of first matching element on slot
 
-  Optionally takes :export argument to automatically export functions created
-  by defstruct and this macro"
+Optional arguments (pass as key value pair same as options for defstruct)
+:export [t/nil] - automatically export functions created by defstruct and this macro
+:with-get-set [VALUE] - creates function with name <NAME|CONC-NAME>-<VALUE> that
+                        gets/sets value of slot on struct with slot keyword representation of slot-name
+
+Example:
+(defstruct (my-struct (:with-get-set slot) (:export t))
+  (a \"initial\" :type string)
+  (b 3           :type number))
+
+(my-struct-slot :a (make-my-struct) ) ; \"initial\"
+(my-struct-slot :b (make-my-struct) :set-value 9) ; #S(MY-STRUCT :A \"initial\" :B 9)
+"
 
 
   (multiple-value-bind (name options) (defstruct-option-parse name-and-options)
-    (let* ((find-defuns         '()) ; symbols created by this macro to be exported
-           (symbols-to-export   '()) ; symbols automatically created by defstruct to be exported
-           (cname               (or (second (assoc :conc-name options))
+    (let* ((fn-list             '()) ; functions created by this macro
+           (symbols-to-export   '()) ; symbols to export
+           (conc-name           (or (second (assoc :conc-name options))
                                     (format nil "~A-" name)))
-           (to-export           (second (assoc :export options)))
+           (with-get-set        (second (assoc :with-get-set options)))
+           (with-get-set-symbol (when with-get-set (intern (format nil "~A~A" conc-name with-get-set))))
+           (to-export           (second (assoc :export options))) 
            (predicate           (assoc :predicate options))
            (predicate-val       (second predicate))
            (constructor         (assoc :constructor options))
            (constructor-val     (second constructor))
-           (n-options           (remove :export options :key #'car))
+           (n-options           (remove-options options '(:with-get-set :export))) ; options for defstruct (keys for this macro removed)
            (n-name-and-options  (cons name n-options))
-           (docstring           (when (stringp (car body)) (car body))); ignored for now, might have add parsing for this later
+           (docstring           (when (stringp (car body)) (car body))) ; ignored for now, might have add parsing for this later
            (slots               (if docstring (cdr body) body)))
+
       ;; adding constructor and predicate to export list (symbols-to-export)
       (when to-export
         (push name symbols-to-export)
@@ -59,24 +72,44 @@
           ((and predicate predicate-val) (push predicate-val symbols-to-export))
           ((not predicate) (push (intern (format nil "~A-P" name)) symbols-to-export))
           (t "(:predicate nil) tells defstruct not to define predicate")))
-      ;; create helper functions
+      ; create helper functions
       (dolist (slot slots)
         (multiple-value-bind (slot-name type) (slot-name-type slot)
           (declare (ignore type))
-          (let ((find-funcname (intern (format nil "~A~A-FIND" cname slot-name)))
-                (func-accessor (intern (format nil "~A~A" cname slot-name))))
+          (let ((find-funcname (intern (format nil "~A~A-FIND" conc-name slot-name)))
+                (func-accessor (intern (format nil "~A~A" conc-name slot-name))))
             (push
               `(defun ,find-funcname (input-list bookmark)
                  (member (,func-accessor bookmark) input-list :test #'equalp :key #',func-accessor))
-              find-defuns)
+              fn-list)
+            (when with-get-set 
+              (let ((fn-keyword (intern (symbol-name slot-name) :keyword)))
+                (push `(defmethod  ,with-get-set-symbol ((slot (eql ,fn-keyword)) obj &key set-value)
+                         (if set-value
+                             (setf (,func-accessor obj) set-value)
+                             (,func-accessor obj)))
+                  fn-list)))
             (when to-export
               (push find-funcname symbols-to-export)
               (push func-accessor symbols-to-export)))))
       ;; insert code
       `(progn
          (defstruct ,n-name-and-options ,@body)
-         ,@(reverse find-defuns)
-         ,(when to-export `(export ',(reverse symbols-to-export)))))))
+         ,(when with-get-set
+            `(defgeneric ,with-get-set-symbol (slot obj &key set-value)))
+         ,@(reverse fn-list)
+         ,(when to-export `(export ',(reverse symbols-to-export)))
+         ',name
+         ))))
+
+#|---------- TESTING ----------|#
+
+; (defstruct-with-helpers (test (:export nil)) (scheme "" :type string)) 
+
+#|------------------------------|#
+
+(defmacro λ (&body body)
+  `(lambda ,@body))
 
 (defmacro gethash-init (key hash-table &body set-form
                         &aux (e-key   (gensym))
@@ -113,7 +146,6 @@
   (lambda (&rest rest-args)
     (apply func (append rest-args bind-args))))
 
-
 (defmacro bind-places (func args &key (sep '_) &aux (f (gensym)))
   "Partially apply function setting arguments to specific places.
   Arguments matching &sep (default _) are to be recieved when returned function is called.
@@ -138,8 +170,7 @@
         with s = 0
         when (char= c split-char)
           collect (subseq str s i)
-          and
-          do (setf s (+ 1 i))))
+          and do (setf s (+ 1 i))))
 
 (defun substr-count (str sub &optional (len (length sub)) (pos (- (length str) len)))
   (if (> 0 pos)
@@ -250,5 +281,8 @@
 (defun get-file-type (input-file)
   (intern
     (string-upcase (subseq-after input-file #\. :from-end t :exclude-first 1))
-    "KEYWORD"))
+    :keyword))
+
+(defun string-to-keyword (s)
+  (intern (string-upcase s) :keyword))
 

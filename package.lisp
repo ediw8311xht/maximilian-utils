@@ -22,5 +22,6 @@
     #:split-by-char
     #:subseq-after
     #:substr-count
+    #:string-to-keyword
     #:λ
     ))
