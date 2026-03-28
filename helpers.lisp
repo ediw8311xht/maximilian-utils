@@ -134,9 +134,10 @@ Example:
 
 (defmacro pipe-arrow (&body body)
   (loop for i in body
-        with results = nil and current = nil
+        with results = nil 
+        with current = nil
         if (eq i '>>)
-          do  (setf results (list (append current results)))
+          do  (setf results (list (append (reverse current) results)))
               (setf current nil)
         else
           do (push i current)
@@ -163,6 +164,20 @@ Example:
                            (lambda (,@unbound)
                              (funcall ,f ,@complete-args))))))
 
+(defun split (split-str str &key (max-count nil))
+  (let ((s (length split-str))) 
+    (labels
+      ((split-rec (str max-count)
+         (let ((i (search split-str str))
+               (max-count (when max-count (- 1 max-count))))
+           (cond
+             ((not i) (list str))
+             ((and max-count (< max-count 1))
+              (cons (subseq str 0 i) 
+                    (list (subseq str (+ s i)))))
+             (t (cons (subseq str 0 i)
+                      (split-rec (subseq str (+ s i)) max-count)))))))
+      (split-rec str max-count))))
 
 (defun split-by-char (str &key (split-char #\,))
   (loop for c across (format nil "~a~c" str split-char)
@@ -286,3 +301,7 @@ Example:
 (defun string-to-keyword (s)
   (intern (string-upcase s) :keyword))
 
+(defun create-plist (props &optional vals)
+  (loop for x in props
+        for y = (when vals (pop vals))
+        collect x collect y))
