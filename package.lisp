@@ -6,6 +6,7 @@
     #:alistp
     #:assoc-val
     #:bind
+    #:bind-m
     #:bind-places
     #:count-leaves
     #:create-plist
@@ -27,3 +28,4 @@
     #:subseq-after
     #:substr-count
     ))
+

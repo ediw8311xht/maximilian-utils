@@ -51,7 +51,7 @@ Example:
                                     (format nil "~A-" name)))
            (with-get-set        (second (assoc :with-get-set options)))
            (with-get-set-symbol (when with-get-set (intern (format nil "~A~A" conc-name with-get-set))))
-           (to-export           (second (assoc :export options))) 
+           (to-export           (second (assoc :export options)))
            (predicate           (assoc :predicate options))
            (predicate-val       (second predicate))
            (constructor         (assoc :constructor options))
@@ -82,7 +82,7 @@ Example:
               `(defun ,find-funcname (input-list bookmark)
                  (member (,func-accessor bookmark) input-list :test #'equalp :key #',func-accessor))
               fn-list)
-            (when with-get-set 
+            (when with-get-set
               (let ((fn-keyword (intern (symbol-name slot-name) :keyword)))
                 (push `(defmethod  ,with-get-set-symbol ((slot (eql ,fn-keyword)) obj &key set-value)
                          (if set-value
@@ -99,14 +99,7 @@ Example:
             `(defgeneric ,with-get-set-symbol (slot obj &key set-value)))
          ,@(reverse fn-list)
          ,(when to-export `(export ',(reverse symbols-to-export)))
-         ',name
-         ))))
-
-#|---------- TESTING ----------|#
-
-; (defstruct-with-helpers (test (:export nil)) (scheme "" :type string)) 
-
-#|------------------------------|#
+         ',name))))
 
 (defmacro λ (&body body)
   `(lambda ,@body))
@@ -134,7 +127,7 @@ Example:
 
 (defmacro pipe-arrow (&body body)
   (loop for i in body
-        with results = nil 
+        with results = nil
         with current = nil
         if (eq i '>>)
           do  (setf results (list (append (reverse current) results)))
@@ -145,47 +138,50 @@ Example:
 
 (defun bind (func &rest bind-args)
   (lambda (&rest rest-args)
-    (apply func (append rest-args bind-args))))
+     (apply func (append bind-args rest-args))))
 
-(defmacro bind-places (func args &key (sep '_) &aux (f (gensym)))
+(defmacro bind-m (func &rest bind-args)
+  `(lambda (&rest rest-args)
+     (apply #',func ,@bind-args rest-args)))
+
+(defmacro bind-places (func args &key (sep '_)
+                       &aux (f (gensym)))
   "Partially apply function setting arguments to specific places.
   Arguments matching &sep (default _) are to be recieved when returned function is called.
-  
+
   Example: (let ((a (bind-places #'format (_ \"~A\" _))))
              (funcall a nil \"HI\")) ; ->  \"HI\""
   (loop for x in args
         for y = (gensym)
-        if (eq x sep)
-          collect y into unbound
-        else
-          collect (list y x) into bound
+        if (eq x sep) collect y          into unbound
+        else          collect (list y x) into bound
         collect y into complete-args
-        finally (return `(let (,@bound (,f ,func))
-                           (lambda (,@unbound)
-                             (funcall ,f ,@complete-args))))))
+        finally (return
+                  `(let (,@bound (,f ,func))
+                     (lambda (,@unbound &rest rest)
+                       (apply ,f ,@complete-args rest))))))
 
-(defun split (split-str str &key (max-count nil))
-  (let ((s (length split-str))) 
-    (labels
-      ((split-rec (str max-count)
-         (let ((i (search split-str str))
-               (max-count (when max-count (- 1 max-count))))
-           (cond
-             ((not i) (list str))
-             ((and max-count (< max-count 1))
-              (cons (subseq str 0 i) 
-                    (list (subseq str (+ s i)))))
-             (t (cons (subseq str 0 i)
-                      (split-rec (subseq str (+ s i)) max-count)))))))
-      (split-rec str max-count))))
+(defun split (split-str str &key (max-count nil) &aux (s (length split-str)))
+  (labels
+    ((split-rec (str max-count)
+       (let ((i (search split-str str))
+             (max-count (when max-count (- 1 max-count))))
+         (cond
+           ((not i) (list str))
+           ((and max-count (< max-count 1))
+            (cons (subseq str 0 i)
+                  (list (subseq str (+ s i)))))
+           (t (cons (subseq str 0 i)
+                    (split-rec (subseq str (+ s i)) max-count)))))))
+    (split-rec str max-count)))
 
 (defun split-by-char (str &key (split-char #\,))
   (loop for c across (format nil "~a~c" str split-char)
         for i from 0
         with s = 0
         when (char= c split-char)
-          collect (subseq str s i)
-          and do (setf s (+ 1 i))))
+        collect (subseq str s i)
+        and do (setf s (+ 1 i))))
 
 (defun substr-count (str sub &optional (len (length sub)) (pos (- (length str) len)))
   (if (> 0 pos)
@@ -305,3 +301,4 @@ Example:
   (loop for x in props
         for y = (when vals (pop vals))
         collect x collect y))
+
