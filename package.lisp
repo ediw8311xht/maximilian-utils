@@ -1,6 +1,7 @@
 
 (defpackage :maximilian-utils
   (:use :cl)
+  (:nicknames :max-utils)
   (:export
     #:λ
     #:alistp

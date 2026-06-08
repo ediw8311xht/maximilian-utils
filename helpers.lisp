@@ -27,21 +27,21 @@
 (defmacro defstruct-with-helpers (name-and-options &body body)
   "Creates structure with function structname-slot-find for each slot.
 
-structname-slot-find: takes input list and struct returning tail of list of first matching element on slot
+  structname-slot-find: takes input list and struct returning tail of list of first matching element on slot
 
-Optional arguments (pass as key value pair same as options for defstruct)
-:export [t/nil] - automatically export functions created by defstruct and this macro
-:with-get-set [VALUE] - creates function with name <NAME|CONC-NAME>-<VALUE> that
-                        gets/sets value of slot on struct with slot keyword representation of slot-name
+  Optional arguments (pass as key value pair same as options for defstruct)
+  :export [t/nil] - automatically export functions created by defstruct and this macro
+  :with-get-set [VALUE] - creates function with name <NAME|CONC-NAME>-<VALUE> that
+  gets/sets value of slot on struct with slot keyword representation of slot-name
 
-Example:
-(defstruct (my-struct (:with-get-set slot) (:export t))
-  (a \"initial\" :type string)
-  (b 3           :type number))
+  Example:
+  (defstruct (my-struct (:with-get-set slot) (:export t))
+    (a \"initial\" :type string)
+    (b 3           :type number))
 
-(my-struct-slot :a (make-my-struct) ) ; \"initial\"
-(my-struct-slot :b (make-my-struct) :set-value 9) ; #S(MY-STRUCT :A \"initial\" :B 9)
-"
+  (my-struct-slot :a (make-my-struct) ) ; \"initial\"
+  (my-struct-slot :b (make-my-struct) :set-value 9) ; #S(MY-STRUCT :A \"initial\" :B 9)
+  "
 
 
   (multiple-value-bind (name options) (defstruct-option-parse name-and-options)
@@ -88,7 +88,7 @@ Example:
                          (if set-value
                              (setf (,func-accessor obj) set-value)
                              (,func-accessor obj)))
-                  fn-list)))
+                      fn-list)))
             (when to-export
               (push find-funcname symbols-to-export)
               (push func-accessor symbols-to-export)))))
@@ -130,15 +130,15 @@ Example:
         with results = nil
         with current = nil
         if (eq i '>>)
-          do  (setf results (list (append (reverse current) results)))
-              (setf current nil)
+        do  (setf results (list (append (reverse current) results)))
+        (setf current nil)
         else
-          do (push i current)
+        do (push i current)
         finally (return (append (reverse current) results))))
 
 (defun bind (func &rest bind-args)
   (lambda (&rest rest-args)
-     (apply func (append bind-args rest-args))))
+    (apply func (append bind-args rest-args))))
 
 (defmacro bind-m (func &rest bind-args)
   `(lambda (&rest rest-args)
@@ -207,8 +207,11 @@ Example:
       ((consp key-val)  (cdr key-val))
       (key-val          key-val))))
 
-(defun show-structure (var &key (level 1) (max-level 5) (indent-size 2))
-  (format t "~VT~S~%" (* level indent-size) (type-of var))
+(defun show-structure (var &key (level 1)
+                           (max-level 5)
+                           (indent-size 2)
+                           (output-func (lambda (var) (type-of var))))
+  (format t "~VT~A~%" (* level indent-size) (funcall output-func var))
 
   (let ((level (+ 1 level)))
     (unless (< max-level level)
@@ -216,12 +219,12 @@ Example:
         (hash-table
           (maphash (lambda (key val)
                      (declare (ignore key))
-                     (show-structure val :level level))
+                     (show-structure val :level level :indent-size indent-size :output-func output-func))
                    var))
         (list
           (fresh-line)
           (loop for i in var
-                do (show-structure i :level level)))
+                do (show-structure i :level level :indent-size indent-size :output-func output-func)))
         (t nil)))))
 
 
