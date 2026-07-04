@@ -28,5 +28,6 @@
     #:string-to-keyword
     #:subseq-after
     #:substr-count
+    #:string-to-pathname
     ))
 

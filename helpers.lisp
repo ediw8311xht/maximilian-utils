@@ -210,8 +210,9 @@
 (defun show-structure (var &key (level 1)
                            (max-level 5)
                            (indent-size 2)
-                           (output-func (lambda (var) (type-of var))))
-  (format t "~VT~A~%" (* level indent-size) (funcall output-func var))
+                           (output-func (lambda (var) (type-of var)))
+                           (output-stream *STANDARD-OUTPUT*))
+  (format output-stream "~VT~@{~A~}~%" (* level indent-size) (funcall output-func var))
 
   (let ((level (+ 1 level)))
     (unless (< max-level level)
@@ -219,12 +220,12 @@
         (hash-table
           (maphash (lambda (key val)
                      (declare (ignore key))
-                     (show-structure val :level level :indent-size indent-size :output-func output-func))
+                     (show-structure val :level level :indent-size indent-size :output-func output-func :output-stream output-stream))
                    var))
         (list
           (fresh-line)
           (loop for i in var
-                do (show-structure i :level level :indent-size indent-size :output-func output-func)))
+                do (show-structure i :level level :indent-size indent-size :output-func output-func :output-stream output-stream)))
         (t nil)))))
 
 
@@ -304,4 +305,24 @@
   (loop for x in props
         for y = (when vals (pop vals))
         collect x collect y))
+
+
+(defun string-to-pathname (str &optional (start 0) (end (length str)))
+  (parse-namestring
+    (with-output-to-string (output)
+      (labels ((handle-var (p)
+                 (let ((next (position-if-not #'alphanumericp str :start p :end end)))
+                   (format output "~A" (or (uiop:getenv (subseq str p next)) ""))
+                   (or next end)))
+               (rec-h (p)
+                 (let ((next (position #\$ str :start p :end end :test #'char=)))
+                   (format output "~A" (subseq str p next))
+                   (when next 
+                     (rec-h (handle-var (+ 1 next))))))
+               (handle-first ()
+                 (if (char= (aref str start) #\~)
+                     (progn (format output "~A" (or (uiop:getenv "HOME") ""))
+                            (rec-h (+ 1 start)))
+                     (rec-h start))))
+        (handle-first)))))
 
