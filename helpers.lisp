@@ -310,8 +310,11 @@
 (defun string-to-pathname (str &optional (start 0) (end (length str)))
   (parse-namestring
     (with-output-to-string (output)
-      (labels ((handle-var (p)
-                 (let ((next (position-if-not #'alphanumericp str :start p :end end)))
+      (labels ((varcharp (c)
+                 (or (alphanumericp c) 
+                     (char= c #\_)))
+               (handle-var (p)
+                 (let ((next (position-if-not #'varcharp str :start p :end end)))
                    (format output "~A" (or (uiop:getenv (subseq str p next)) ""))
                    (or next end)))
                (rec-h (p)
