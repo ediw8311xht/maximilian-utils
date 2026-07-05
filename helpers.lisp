@@ -79,8 +79,8 @@
           (let ((find-funcname (intern (format nil "~A~A-FIND" conc-name slot-name)))
                 (func-accessor (intern (format nil "~A~A" conc-name slot-name))))
             (push
-              `(defun ,find-funcname (input-list bookmark)
-                 (member (,func-accessor bookmark) input-list :test #'equalp :key #',func-accessor))
+              `(defun ,find-funcname (input-list struct)
+                 (member (,func-accessor struct) input-list :test #'equalp :key #',func-accessor))
               fn-list)
             (when with-get-set
               (let ((fn-keyword (intern (symbol-name slot-name) :keyword)))
@@ -111,9 +111,9 @@
                         (e-found      (gensym)))
   "Gets value at key in hash-table and sets it to value of `set-form` if it
   doesn't already exist."
-  `(let ((,e-key ,key) (,e-hash-table ,hash-table))
-     (multiple-value-bind (,e-value ,e-found)
-       (gethash ,e-key ,e-hash-table)
+  `(let ((,e-key ,key)
+         (,e-hash-table ,hash-table))
+     (multiple-value-bind (,e-value ,e-found) (gethash ,e-key ,e-hash-table)
        (if ,e-found
            ,e-value
            (setf (gethash ,e-key ,e-hash-table)
@@ -136,10 +136,6 @@
         do (push i current)
         finally (return (append (reverse current) results))))
 
-(defun bind (func &rest bind-args)
-  (lambda (&rest rest-args)
-    (apply func (append bind-args rest-args))))
-
 (defmacro bind-m (func &rest bind-args)
   `(lambda (&rest rest-args)
      (apply #',func ,@bind-args rest-args)))
@@ -160,6 +156,10 @@
                   `(let (,@bound (,f ,func))
                      (lambda (,@unbound &rest rest)
                        (apply ,f ,@complete-args rest))))))
+
+(defun bind (func &rest bind-args)
+  (lambda (&rest rest-args)
+    (apply func (append bind-args rest-args))))
 
 (defun split (split-str str &key (max-count nil) &aux (s (length split-str)))
   (labels
@@ -202,10 +202,7 @@
       ""))
 
 (defun assoc-val (symbol assoc-list)
-  (let ((key-val (assoc symbol assoc-list)))
-    (cond
-      ((consp key-val)  (cdr key-val))
-      (key-val          key-val))))
+  (cdr (assoc symbol assoc-list)))
 
 (defun show-structure (var &key (level 1)
                            (max-level 5)
@@ -230,10 +227,7 @@
 
 
 (defun join (sep &rest rest)
-  (with-output-to-string (output)
-    (format output "~A" (car rest))
-    (loop for i in (cdr rest)
-          do (format output "~A~A" sep i))))
+  (format nil (format nil "~~{~~A~~^~A~~}" sep) rest))
 
 (defun join-symbols (sep &rest rest)
   (intern (apply #'join sep rest)))
@@ -251,7 +245,7 @@
                          &key (foundp nil)
                          (from-end nil)
                          (exclude-first nil))
-  (let* ((pos (position character str :from-end from-end)))
+  (let ((pos (position character str :from-end from-end)))
     (if pos (subseq str (if exclude-first (+ pos 1) pos))
         foundp)))
 
@@ -310,9 +304,7 @@
 (defun string-to-pathname (str &optional (start 0) (end (length str)))
   (parse-namestring
     (with-output-to-string (output)
-      (labels ((varcharp (c)
-                 (or (alphanumericp c) 
-                     (char= c #\_)))
+      (labels ((varcharp (c) (or (alphanumericp c) (char= c #\_)))
                (handle-var (p)
                  (let ((next (position-if-not #'varcharp str :start p :end end)))
                    (format output "~A" (or (uiop:getenv (subseq str p next)) ""))
