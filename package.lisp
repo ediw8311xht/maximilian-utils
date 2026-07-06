@@ -29,5 +29,6 @@
     #:subseq-after
     #:substr-count
     #:string-to-pathname
+    #:bool-val
     ))
 

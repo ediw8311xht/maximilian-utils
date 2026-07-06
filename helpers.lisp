@@ -321,3 +321,5 @@
                      (rec-h start))))
         (handle-first)))))
 
+(defun bool-val (v) (not (not v)))
+
