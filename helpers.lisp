@@ -20,7 +20,7 @@
                              (cddr slot-definition)))) ; when slot contains default value
               (values (first slot-definition) (getf plist :type))))))
   (defun remove-options (options to-remove)
-    (delete-if #'(lambda (opt) (find (car opt) to-remove))
+    (delete-if (lambda (opt) (find (car opt) to-remove))
                options))
   )
 
@@ -281,11 +281,11 @@
 
 (defun get-leaves (input-data)
   "Returns list of atoms in data structure and nested data structures."
-  (reduce-leaves #'append input-data :key #'(lambda (x) (when x (list x)))))
+  (reduce-leaves #'append input-data :key (lambda (x) (when x (list x)))))
 
 (defun count-leaves (input-data)
   "Returns numbers of atoms in data structure and nested data structures."
-  (reduce-leaves #'+ input-data :key #'(lambda (x) (if x 1 0))))
+  (reduce-leaves #'+ input-data :key (lambda (x) (if x 1 0))))
 
 (defun get-file-type (input-file)
   (intern
@@ -312,7 +312,7 @@
                (rec-h (p)
                  (let ((next (position #\$ str :start p :end end :test #'char=)))
                    (format output "~A" (subseq str p next))
-                   (when next 
+                   (when next
                      (rec-h (handle-var (+ 1 next))))))
                (handle-first ()
                  (if (char= (aref str start) #\~)
@@ -323,3 +323,12 @@
 
 (defun bool-val (v) (not (not v)))
 
+(defun directory-recursive-files (path fn)
+  (unless (uiop:directory-exists-p path)
+    (error "Directory, '~A', couldn't be found." path))
+  (uiop:collect-sub*directories
+    path
+    (constantly t)
+    (constantly t)
+    (lambda (subdir)
+      (mapc fn (uiop:directory-files subdir)))))

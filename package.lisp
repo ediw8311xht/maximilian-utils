@@ -30,5 +30,6 @@
     #:substr-count
     #:string-to-pathname
     #:bool-val
+    #:directory-recursive-files
     ))
 
