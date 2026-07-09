@@ -323,12 +323,21 @@
 
 (defun bool-val (v) (not (not v)))
 
-(defun directory-recursive-files (path fn)
+(defun directory-recursive-files (path fn &key (max-depth nil))
+  "Call function `fn` on all files within directories and subdirectories of `path`
+  Limit depth of directory to recurse into using `max-depth` with 1 being direct directories of path."
   (unless (uiop:directory-exists-p path)
     (error "Directory, '~A', couldn't be found." path))
-  (uiop:collect-sub*directories
-    path
-    (constantly t)
-    (constantly t)
-    (lambda (subdir)
-      (mapc fn (uiop:directory-files subdir)))))
+  (when (and max-depth (or (not (integerp max-depth)) (< max-depth 0)))
+    (error ":max-depth must be nil or a non-negative integer. passed value: ~A" max-depth))
+  (let ((path-length (- (length (pathname-directory path)) 1))) 
+    (uiop:collect-sub*directories
+      path
+      (constantly t)
+      (if max-depth
+          (lambda (subdir) (> max-depth (- (length (pathname-directory subdir))
+                                           path-length)))
+          (constantly t))
+      (lambda (subdir)
+        (mapc fn (uiop:directory-files subdir))))))
+
