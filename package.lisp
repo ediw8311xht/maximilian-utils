@@ -1,4 +1,4 @@
-
+(in-package :cl-user)
 (defpackage :maximilian-utils
   (:use :cl)
   (:nicknames :max-utils)
