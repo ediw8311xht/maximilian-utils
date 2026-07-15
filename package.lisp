@@ -9,9 +9,11 @@
     #:bind
     #:bind-m
     #:bind-places
+    #:bool-val
     #:count-leaves
     #:create-plist
     #:defstruct-with-helpers
+    #:directory-recursive-files
     #:format-combine
     #:get-file-type
     #:get-leaves
@@ -26,10 +28,10 @@
     #:split
     #:split-by-char
     #:string-to-keyword
+    #:string-to-pathname
+    #:string-to-symbol
     #:subseq-after
     #:substr-count
-    #:string-to-pathname
-    #:bool-val
-    #:directory-recursive-files
+    #:utc-format
     ))
 

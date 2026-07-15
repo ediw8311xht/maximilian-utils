@@ -292,8 +292,12 @@
     (string-upcase (subseq-after input-file #\. :from-end t :exclude-first 1))
     :keyword))
 
-(defun string-to-keyword (s)
-  (intern (string-upcase s) :keyword))
+(defun string-to-keyword (s &key keep-case)
+  (intern (if keep-case s (string-upcase s)) 
+          :keyword))
+
+(defun string-to-symbol (s &key keep-case)
+  (intern (if keep-case s (string-upcase s))))
 
 (defun create-plist (props &optional vals)
   (loop for x in props
@@ -340,4 +344,8 @@
           (constantly t))
       (lambda (subdir)
         (mapc fn (uiop:directory-files subdir))))))
+
+(defun utc-format (s &key utc stream)
+  (multiple-value-call #'format stream s
+    (decode-universal-time (or utc (get-universal-time)))))
 
