@@ -12,6 +12,7 @@
     #:bool-val
     #:count-leaves
     #:create-plist
+    #:date-alist
     #:defstruct-with-helpers
     #:directory-recursive-files
     #:format-combine
@@ -32,6 +33,8 @@
     #:string-to-symbol
     #:subseq-after
     #:substr-count
+    #:timestamp-to-ntp
     #:utc-format
+    #:utc-alist
     ))
 

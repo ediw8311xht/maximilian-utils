@@ -11,7 +11,6 @@
                              collect `(,k ,v))))
         (values name-and-options '())))
 
-
   (defun slot-name-type (slot-definition)
     (typecase slot-definition
       (atom (values slot-definition nil))
@@ -345,7 +344,19 @@
       (lambda (subdir)
         (mapc fn (uiop:directory-files subdir))))))
 
-(defun utc-format (s &key utc stream)
+(defun timestamp-to-ntp (s &optional (epoch :unix))
+  (case epoch
+    (:unix (- s 2208988800))
+    (t     s)))
+
+(defun utc-format (s &key (epoch :ntp) utc stream)
   (multiple-value-call #'format stream s
-    (decode-universal-time (or utc (get-universal-time)))))
+    (if utc (decode-universal-time 
+              (timestamp-to-ntp s epoch)) 
+        (get-decoded-time))))
+
+(defun utc-alist (&optional utc)
+  (mapcar #'cons '(:second :minute :hour :day :month :year :day-of-week :daylight-savings :timezone)
+          (multiple-value-list (if utc (decode-universal-time utc) 
+                                   (get-decoded-time)))))
 
