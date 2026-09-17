@@ -295,8 +295,10 @@
   (intern (if keep-case s (string-upcase s)) 
           :keyword))
 
-(defun string-to-symbol (s &key keep-case)
-  (intern (if keep-case s (string-upcase s))))
+(defun string-to-symbol (s &key keep-case package)
+  (funcall #'intern 
+           (if keep-case s (string-upcase s))
+           package))
 
 (defun create-plist (props &optional vals)
   (loop for x in props
