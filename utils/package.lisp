@@ -36,5 +36,7 @@
     #:timestamp-to-ntp
     #:utc-format
     #:utc-alist
+    #:make-circular
+    #:print-2d-array
     ))
 

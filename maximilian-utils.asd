@@ -3,11 +3,18 @@
   :description "Various utility functions and macros."
   :author "Maximilian Ballard"
   :license "GPLv3"
-  :version "1.1"
+  :version "2.1.0"
   :depends-on ("uiop")
   :serial t
-  :components ((:file "package")
-               (:file "main"))
+  :components (
+               (:module "utils"
+                :components ((:file "package")
+                             (:file "utils")))
+
+               (:module "data-structures"
+                :components ((:file "package")
+                             (:file "queue")))
+               )
 
   :description "some utilities"
   :in-order-to ((test-op (test-op "maximilian-utils/tests"))))

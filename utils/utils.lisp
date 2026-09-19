@@ -148,8 +148,8 @@
              (funcall a nil \"HI\")) ; ->  \"HI\""
   (loop for x in args
         for y = (gensym)
-        if (eq x sep) collect y          into unbound
-        else          collect (list y x) into bound
+        if (and (symbolp x) (string= (symbol-name x) (symbol-name sep))) collect y into unbound
+        else collect (list y x) into bound
         collect y into complete-args
         finally (return
                   `(let (,@bound (,f ,func))
@@ -295,8 +295,10 @@
   (intern (if keep-case s (string-upcase s)) 
           :keyword))
 
-(defun string-to-symbol (s &key keep-case)
-  (intern (if keep-case s (string-upcase s))))
+(defun string-to-symbol (s &key keep-case package)
+  (funcall #'intern 
+           (if keep-case s (string-upcase s))
+           package))
 
 (defun create-plist (props &optional vals)
   (loop for x in props
@@ -359,4 +361,23 @@
   (mapcar #'cons '(:second :minute :hour :day :month :year :day-of-week :daylight-savings :timezone)
           (multiple-value-list (if utc (decode-universal-time utc) 
                                    (get-decoded-time)))))
+(defun make-circular (l &key (set-print-circle nil))
+  (setf (cdr (last l)) l)
+  (when set-print-circle (setf *print-circle* t))
+  l)
 
+(defun print-2d-array (array &key
+                             (column-separator #\Newline)
+                             (row-separator    #\Space)
+                             (output-stream *standard-output*)
+                             (end nil)
+                             (beginning nil))
+  (loop 
+    with (cols rows) = (array-dimensions array)
+    for y from 0 below cols
+    initially (when beginning (princ beginning output-stream))
+    when (> y 0) do (princ column-separator output-stream)
+    do (loop for x from 0 below rows
+             when (> x 0) do (princ row-separator output-stream)
+             do (princ (aref array y x) output-stream))
+    finally (when end (princ end output-stream))))
