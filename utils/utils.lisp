@@ -361,9 +361,9 @@
   (mapcar #'cons '(:second :minute :hour :day :month :year :day-of-week :daylight-savings :timezone)
           (multiple-value-list (if utc (decode-universal-time utc) 
                                    (get-decoded-time)))))
-(defun make-circular (l &key (set-print-circle nil))
+(defun make-circular (l &key (print-circle t))
   (setf (cdr (last l)) l)
-  (when set-print-circle (setf *print-circle* t))
+  (when print-circle (setf *print-circle* t))
   l)
 
 (defun print-2d-array (array &key
