@@ -100,8 +100,6 @@ little benefit to writing my own tests and also saves a lot of time
     (is (equal "HELLO" (funcall formatter nil "HELLO")))))
 
 (test piping
-  ;; (pipe 5 (1+) (* 2)) => (* (1+ 5) 2) = 12 ... wait, let's look at the macro expansion
-  ;; The macro nests them: (pipe 5 (1+) (list :a)) => (list :a (1+ 5))
   (is (= 6 (pipe 5 (1+))))
   (is (equal '(:a 6) (pipe 5 (1+) (list :a)))))
 

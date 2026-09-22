@@ -128,7 +128,7 @@
   (loop for i in body
         with results = nil
         with current = nil
-        if (eq i '>>)
+        if (and (symbolp i) (string= (symbol-name i) ">>"))
         do  (setf results (list (append (reverse current) results)))
         (setf current nil)
         else

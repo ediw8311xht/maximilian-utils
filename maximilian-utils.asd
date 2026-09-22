@@ -3,7 +3,7 @@
   :description "Various utility functions and macros."
   :author "Maximilian Ballard"
   :license "GPLv3"
-  :version "2.1.0"
+  :version "2.1.1"
   :depends-on ("uiop")
   :serial t
   :components (
