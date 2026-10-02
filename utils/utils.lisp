@@ -136,6 +136,7 @@
         finally (return (append (reverse current) results))))
 
 (defmacro bind-m (func &rest bind-args)
+  "bind but as macro"
   `(lambda (&rest rest-args)
      (apply #',func ,@bind-args rest-args)))
 
@@ -181,6 +182,20 @@
         when (char= c split-char)
         collect (subseq str s i)
         and do (setf s (+ 1 i))))
+
+(defun split-by-chars (str chars &key sharedp)
+  (cond 
+    ((not chars) (list str))
+    (t (loop with str-app = (format nil "~A~C" str (car chars))
+             for start-index = 0 then (+ end-index 1)
+             for end-index = (position-if #'(lambda (c) (find c chars)) str-app :start start-index)
+             while end-index
+             do (pprint end-index )
+             if sharedp
+             collect (make-array (- end-index start-index) :element-type 'character :displaced-to str :displaced-index-offset start-index)
+             else
+             collect (subseq str start-index end-index)
+             ))))
 
 (defun substr-count (str sub &optional (len (length sub)) (pos (- (length str) len)))
   (if (> 0 pos)
@@ -361,23 +376,25 @@
   (mapcar #'cons '(:second :minute :hour :day :month :year :day-of-week :daylight-savings :timezone)
           (multiple-value-list (if utc (decode-universal-time utc) 
                                    (get-decoded-time)))))
-(defun make-circular (l &key (print-circle t))
+(defun make-circular (l)
   (setf (cdr (last l)) l)
-  (when print-circle (setf *print-circle* t))
   l)
 
 (defun print-2d-array (array &key
-                             (column-separator #\Newline)
-                             (row-separator    #\Space)
+                             (column-separator #\Space)
+                             (row-separator    #\Newline)
                              (output-stream *standard-output*)
-                             (end nil)
-                             (beginning nil))
+                             (end #\Newline)
+                             (beginning #\Newline))
   (loop 
     with (cols rows) = (array-dimensions array)
-    for y from 0 below cols
+    with start       = (- cols 1)
     initially (when beginning (princ beginning output-stream))
-    when (> y 0) do (princ column-separator output-stream)
+    for y from start downto 0
+    when (< y start) do (princ row-separator output-stream)
+
     do (loop for x from 0 below rows
-             when (> x 0) do (princ row-separator output-stream)
+             when (> x 0) do (princ column-separator output-stream)
              do (princ (aref array y x) output-stream))
     finally (when end (princ end output-stream))))
+

@@ -28,6 +28,7 @@
     #:show-structure
     #:split
     #:split-by-char
+    #:split-by-chars
     #:string-to-keyword
     #:string-to-pathname
     #:string-to-symbol

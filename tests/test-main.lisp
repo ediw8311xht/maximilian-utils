@@ -5,9 +5,6 @@ tests created with ai.... yeah i hate ai but for this specific purpose i find
 little benefit to writing my own tests and also saves a lot of time
 |#
 
-(defpackage :maximilian-utils/tests
-  (:use :cl :maximilian-utils :fiveam))
-
 (in-package :maximilian-utils/tests)
 
 ;; Define the main test suite
