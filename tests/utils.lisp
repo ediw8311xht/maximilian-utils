@@ -1,17 +1,10 @@
 
-
-#| 
-tests created with ai.... yeah i hate ai but for this specific purpose i find
-little benefit to writing my own tests and also saves a lot of time
-|#
-
-(in-package :maximilian-utils/tests)
-
+(in-suite :main-test-suite)
 ;; Define the main test suite
-(def-suite :maximilian-utils-suite
-  :description "Main test suite for the maximilian-utils package")
+(def-suite :utils-test-suite
+  :description "Utility test suite for the maximilian-utils package")
 
-(in-suite :maximilian-utils-suite)
+(in-suite :maximilian-utils-utility-suite)
 
 ;; -----------------------------------------------------------------------------
 ;; String Utilities

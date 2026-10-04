@@ -28,9 +28,10 @@
                )
   :serial t
   :components ((:module "tests"
-                :components ((:file "test-package")
-                             (:file "test-main")
-                             (:file "test-utils")
-                             (:file "test-data-structures"))))
+                :components ((:file "package")
+                             (:file "utils")
+                             (:file "data-structures")
+                             (:file "main")
+                             )))
   :description "Testing maximilian-utils"
   :perform (test-op (o c) (symbol-call :fiveam '#:run-all-tests)))
