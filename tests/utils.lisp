@@ -1,10 +1,12 @@
 
-(in-suite :main-test-suite)
-;; Define the main test suite
-(def-suite :utils-test-suite
-  :description "Utility test suite for the maximilian-utils package")
+(in-package :maximilian-utils/tests)
 
-(in-suite :maximilian-utils-utility-suite)
+;; Define the main test suite
+(def-suite :utils-test
+  :description "utils testing"
+  )
+
+(in-suite :utils-test)
 
 ;; -----------------------------------------------------------------------------
 ;; String Utilities

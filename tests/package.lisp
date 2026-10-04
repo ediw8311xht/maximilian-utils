@@ -1,11 +1,9 @@
+
 (defpackage :maximilian-utils/tests
-  (:use :cl 
-        :maximilian-utils 
+  (:use :cl
+        :maximilian-utils
+        :maximilian-utils.queue
         :fiveam
         )
-  (:export :main-test-suite
-           :utils-test-suite
-           :data-structures-test-suite
-           )
   )
 
