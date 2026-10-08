@@ -21,8 +21,10 @@
     #:gethash-init
     #:join
     #:join-symbols
+    #:make-circular
     #:pipe
     #:pipe-arrow
+    #:print-2d-array
     #:reduce-leaves
     #:return-nil
     #:show-structure
@@ -35,9 +37,7 @@
     #:subseq-after
     #:substr-count
     #:timestamp-to-ntp
-    #:utc-format
     #:utc-alist
-    #:make-circular
-    #:print-2d-array
+    #:utc-format
     ))
 

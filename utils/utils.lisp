@@ -190,7 +190,6 @@
              for start-index = 0 then (+ end-index 1)
              for end-index = (position-if #'(lambda (c) (find c chars)) str-app :start start-index)
              while end-index
-             do (pprint end-index )
              if sharedp
              collect (make-array (- end-index start-index) :element-type 'character :displaced-to str :displaced-index-offset start-index)
              else
@@ -376,9 +375,11 @@
   (mapcar #'cons '(:second :minute :hour :day :month :year :day-of-week :daylight-savings :timezone)
           (multiple-value-list (if utc (decode-universal-time utc) 
                                    (get-decoded-time)))))
-(defun make-circular (l)
-  (setf (cdr (last l)) l)
-  l)
+(defun make-circular (l &key (sharedp nil))
+  (if sharedp
+      (and (setf (cdr (last l)) l) l)
+      (let ((n-l (copy-list l)))
+        (setf (cdr (last n-l)) n-l))))
 
 (defun print-2d-array (array &key
                              (column-separator #\Space)
