@@ -3,13 +3,14 @@
   :description "Various utility functions and macros."
   :author "Maximilian Ballard"
   :license "GPLv3"
-  :version "2.1.1"
+  :version "2.1.2"
   :depends-on ("uiop")
   :serial t
   :components (
                (:module "utils"
                 :components ((:file "package")
-                             (:file "utils")))
+                             (:file "macros")
+                             (:file "functions")))
 
                (:module "data-structures"
                 :components ((:file "package")
