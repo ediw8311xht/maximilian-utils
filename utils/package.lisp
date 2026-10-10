@@ -3,27 +3,31 @@
   (:use :cl)
   (:nicknames :max-utils)
   (:export
+    ;; macros
     #:λ
+    #:defstruct-with-helpers
+    #:gethash-init
+    #:bind-m
+    #:bind-places
+    #:defun-memoize
+    #:pipe
+    #:pipe-arrow
+
+    ;; functions
     #:alistp
     #:assoc-val
     #:bind
-    #:bind-m
-    #:bind-places
     #:bool-val
     #:count-leaves
     #:create-plist
     #:date-alist
-    #:defstruct-with-helpers
     #:directory-recursive-files
     #:format-combine
     #:get-file-type
     #:get-leaves
-    #:gethash-init
     #:join
     #:join-symbols
     #:make-circular
-    #:pipe
-    #:pipe-arrow
     #:print-2d-array
     #:reduce-leaves
     #:return-nil

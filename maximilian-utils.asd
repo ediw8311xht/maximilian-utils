@@ -3,13 +3,14 @@
   :description "Various utility functions and macros."
   :author "Maximilian Ballard"
   :license "GPLv3"
-  :version "2.1.2"
+  :version "2.1.3"
   :depends-on ("uiop")
   :serial t
   :components (
                (:module "utils"
                 :components ((:file "package")
                              (:file "macros")
+                             (:file "memoize")
                              (:file "functions")))
 
                (:module "data-structures"
@@ -33,6 +34,7 @@
                              (:file "package")
                              (:file "utils")
                              (:file "utils-split-chars")
+                             (:file "utils-memoize")
                              (:file "data-structures")
                              )))
   :description "Testing maximilian-utils"
