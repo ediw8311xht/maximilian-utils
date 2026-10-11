@@ -1,6 +1,7 @@
 (in-package :maximilian-utils/tests)
 
-(def-suite memoize-suite :description "Test suite for defun-memoize macro.")
+(def-suite memoize-suite 
+  :description "Test suite for defun-memoize macro.")
 (in-suite memoize-suite)
 
 (test factorial-execution

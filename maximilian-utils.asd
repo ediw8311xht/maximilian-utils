@@ -35,6 +35,7 @@
                              (:file "utils")
                              (:file "utils-split-chars")
                              (:file "utils-memoize")
+                             (:file "utils-case-compare-number")
                              (:file "data-structures")
                              )))
   :description "Testing maximilian-utils"

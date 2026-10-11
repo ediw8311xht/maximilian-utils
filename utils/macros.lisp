@@ -119,12 +119,19 @@
                  (progn ,@set-form))))))
 
 (defmacro pipe (&body function-calls)
+"pipe output of one function into another each being a list:
+example:
+  ```lisp
+  (pipe (+ 3 5) (+ 3) (* 2)) ; -> 22
+  ```
+"
   (loop for x in (cdr function-calls)
         with return-function = (car function-calls)
         do (setf return-function (append x (list return-function)))
         finally (return return-function)))
 
 (defmacro pipe-arrow (&body body)
+  "pipe output of one function into another separated by >>"
   (loop for i in body
         with results = nil
         with current = nil
@@ -156,3 +163,30 @@
                   `(let (,@bound (,f ,func))
                      (lambda (,@unbound &rest rest)
                        (apply ,f ,@complete-args rest))))))
+
+(defmacro case-compare-number (number-form &body body)
+"`case` allowing number comparison
+example:
+  ```
+  (case-compare 4
+    (2          \"equal to 2\")
+    ((< 3)      \"less than three\")
+    (4          \"equal to four\")
+    ((> 3)      \"more than three\")
+    (otherwise  \"equal to three\"))
+  ; \"equal to four\"
+  ```"
+  (let ((g-number-form (gensym)))
+    `(let ((,g-number-form ,number-form))
+       (cond
+         ,@(loop for (check . form) in body
+                 collect (cond
+                           ; eval with function
+                           ((consp check)
+                            `((,(car check)  ,g-number-form ,@(cdr check)) ,@form))
+                           ; t otherwise handling
+                           ((member check '(t otherwise))
+                            `(t ,@form))
+                           ; var/number handling
+                           (t `((= ,check ,g-number-form) ,@form))))))))
+

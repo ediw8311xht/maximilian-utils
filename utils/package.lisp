@@ -12,6 +12,7 @@
     #:defun-memoize
     #:pipe
     #:pipe-arrow
+    #:case-compare-number
 
     ;; functions
     #:alistp

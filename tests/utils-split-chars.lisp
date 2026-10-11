@@ -3,7 +3,6 @@
 ;; Define the test suite
 (def-suite split-by-chars-suite
   :description "Test suite for the split-by-chars function.")
-
 (in-suite split-by-chars-suite)
 
 ;; 1. Test basic splitting behavior

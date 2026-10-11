@@ -3,9 +3,7 @@
 
 ;; Define the main test suite
 (def-suite :utils-test
-  :description "utils testing"
-  )
-
+  :description "utils testing")
 (in-suite :utils-test)
 
 ;; -----------------------------------------------------------------------------
