@@ -1,8 +1,21 @@
 (in-package :maximilian-utils)
 
-(defun bind (func &rest bind-args)
-  (lambda (&rest rest-args)
-    (apply func (append bind-args rest-args))))
+#| strings, chars, and output |#
+
+(defun string-to-keyword (s &key keep-case)
+  (intern (if keep-case s (string-upcase s)) 
+          :keyword))
+
+(defun string-to-symbol (s &key keep-case package)
+  (funcall #'intern 
+           (if keep-case s (string-upcase s))
+           package))
+
+(defun join (sep &rest rest)
+  (format nil (format nil "~~{~~A~~^~A~~}" sep) rest))
+
+(defun join-symbols (sep &rest rest)
+  (intern (apply #'join sep rest)))
 
 (defun split (split-str str &key (max-count nil) &aux (s (length split-str)))
   (labels
@@ -57,15 +70,28 @@
             finally (return (values (apply #'format nil s args) rest-args)))
       ""))
 
+(defun return-nil (&rest rest)
+  (declare (ignore rest)) nil)
+
 (defun assoc-val (symbol assoc-list)
   (cdr (assoc symbol assoc-list)))
+
+(defun alistp (alist)
+  (if alist
+      (and (consp (first alist))
+           (alistp (rest alist)))
+      t))
 
 (defun show-structure (var &key (level 1)
                            (max-level 5)
                            (indent-size 2)
                            (output-func (lambda (var) (type-of var)))
                            (output-stream *STANDARD-OUTPUT*))
-  (format output-stream "~VT~@{~A~}~%" (* level indent-size) (funcall output-func var))
+  (format output-stream "~VT~@{~A~}~%" 
+          (* level indent-size) 
+          (if output-func 
+              (funcall output-func var)
+              var))
 
   (let ((level (+ 1 level)))
     (unless (< max-level level)
@@ -81,21 +107,6 @@
                 do (show-structure i :level level :indent-size indent-size :output-func output-func :output-stream output-stream)))
         (t nil)))))
 
-
-(defun join (sep &rest rest)
-  (format nil (format nil "~~{~~A~~^~A~~}" sep) rest))
-
-(defun join-symbols (sep &rest rest)
-  (intern (apply #'join sep rest)))
-
-(defun return-nil (&rest rest)
-  (declare (ignore rest)) nil)
-
-(defun alistp (alist)
-  (if alist
-      (and (consp (first alist))
-           (alistp (rest alist)))
-      t))
 
 (defun subseq-after (str character
                          &key (foundp nil)
@@ -148,15 +159,6 @@
     (string-upcase (subseq-after input-file #\. :from-end t :exclude-first 1))
     :keyword))
 
-(defun string-to-keyword (s &key keep-case)
-  (intern (if keep-case s (string-upcase s)) 
-          :keyword))
-
-(defun string-to-symbol (s &key keep-case package)
-  (funcall #'intern 
-           (if keep-case s (string-upcase s))
-           package))
-
 (defun create-plist (props &optional vals)
   (loop for x in props
         for y = (when vals (pop vals))
@@ -183,7 +185,68 @@
                      (rec-h start))))
         (handle-first)))))
 
-(defun bool-val (v) (not (not v)))
+
+(defun print-2d-array (array &key
+                             (column-separator #\Space)
+                             (row-separator    #\Newline)
+                             (output-stream *standard-output*)
+                             (beginning #\Newline) 
+                             (end #\Newline))
+  "print contents of 2d array"
+  (loop 
+    with (cols rows) = (array-dimensions array)
+    with start       = (- cols 1)
+    initially (when beginning (princ beginning output-stream))
+    for y from start downto 0
+    when (< y start) do (princ row-separator output-stream)
+
+    do (loop for x from 0 below rows
+             when (> x 0) do (princ column-separator output-stream)
+             do (princ (aref array y x) output-stream))
+    finally (when end (princ end output-stream))))
+
+
+(defun easy-pprint (opts &rest rest)
+  "pprint with but print all arguments with optional postfix, prefix, and separator"
+  (destructuring-bind
+    (&key (output *standard-output*)
+          (prefix    nil)
+          (postfix   nil)
+          (separator #\Newline))
+    opts
+    (format output
+            (format nil "~@[~A~]~~{~~A~~^~A~~}~@[~A~]" prefix separator postfix)
+            rest)))
+
+(defun repeat-string (str times &key (out nil))
+  "repeat aesthetic representation a certain number times"
+  (format out "~v@{~A~:*~}" times str))
+
+#| time functions |#
+
+(defun timestamp-to-ntp (s &optional (epoch :unix))
+  (case epoch
+    (:unix (- s 2208988800))
+    (t     s)))
+
+(defun utc-format (s &key (epoch :ntp) utc stream)
+  (multiple-value-call #'format stream s
+    (if utc (decode-universal-time 
+              (timestamp-to-ntp s epoch)) 
+        (get-decoded-time))))
+
+(defun utc-alist (&optional utc)
+  "return a plist of utc datetime elements (default is current datetime)"
+  (mapcar #'cons '(:second :minute :hour :day :month :year :day-of-week :daylight-savings :timezone)
+          (multiple-value-list (if utc (decode-universal-time utc) 
+                                   (get-decoded-time)))))
+#| misc functions |#
+
+(defun make-circular (l &key (sharedp nil))
+  (if sharedp
+      (and (setf (cdr (last l)) l) l)
+      (let ((n-l (copy-list l)))
+        (setf (cdr (last n-l)) n-l))))
 
 (defun directory-recursive-files (path fn &key (max-depth nil))
   "Call function `fn` on all files within directories and subdirectories of `path`
@@ -203,42 +266,9 @@
       (lambda (subdir)
         (mapc fn (uiop:directory-files subdir))))))
 
-(defun timestamp-to-ntp (s &optional (epoch :unix))
-  (case epoch
-    (:unix (- s 2208988800))
-    (t     s)))
+(defun bind (func &rest bind-args)
+  (lambda (&rest rest-args)
+    (apply func (append bind-args rest-args))))
 
-(defun utc-format (s &key (epoch :ntp) utc stream)
-  (multiple-value-call #'format stream s
-    (if utc (decode-universal-time 
-              (timestamp-to-ntp s epoch)) 
-        (get-decoded-time))))
-
-(defun utc-alist (&optional utc)
-  (mapcar #'cons '(:second :minute :hour :day :month :year :day-of-week :daylight-savings :timezone)
-          (multiple-value-list (if utc (decode-universal-time utc) 
-                                   (get-decoded-time)))))
-(defun make-circular (l &key (sharedp nil))
-  (if sharedp
-      (and (setf (cdr (last l)) l) l)
-      (let ((n-l (copy-list l)))
-        (setf (cdr (last n-l)) n-l))))
-
-(defun print-2d-array (array &key
-                             (column-separator #\Space)
-                             (row-separator    #\Newline)
-                             (output-stream *standard-output*)
-                             (end #\Newline)
-                             (beginning #\Newline))
-  (loop 
-    with (cols rows) = (array-dimensions array)
-    with start       = (- cols 1)
-    initially (when beginning (princ beginning output-stream))
-    for y from start downto 0
-    when (< y start) do (princ row-separator output-stream)
-
-    do (loop for x from 0 below rows
-             when (> x 0) do (princ column-separator output-stream)
-             do (princ (aref array y x) output-stream))
-    finally (when end (princ end output-stream))))
+(defun bool-val (v) (not (not v)))
 

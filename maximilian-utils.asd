@@ -9,9 +9,10 @@
   :components (
                (:module "utils"
                 :components ((:file "package")
+                             (:file "functions")  
                              (:file "macros")
                              (:file "memoize")
-                             (:file "functions")))
+                             ))
 
                (:module "data-structures"
                 :components ((:file "package")

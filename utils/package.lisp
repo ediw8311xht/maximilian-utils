@@ -23,6 +23,7 @@
     #:create-plist
     #:date-alist
     #:directory-recursive-files
+    #:easy-pprint ; todo - add test
     #:format-combine
     #:get-file-type
     #:get-leaves
@@ -31,6 +32,7 @@
     #:make-circular
     #:print-2d-array
     #:reduce-leaves
+    #:repeat-string ; todo - add test
     #:return-nil
     #:show-structure
     #:split
