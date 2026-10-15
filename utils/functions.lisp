@@ -206,12 +206,13 @@
     finally (when end (princ end output-stream))))
 
 
+;; note - going to modify lambda list when opts is not a list/cons/keyword (excluding nil) to be the output stream
 (defun easy-pprint (opts &rest rest)
   "pprint with but print all arguments with optional postfix, prefix, and separator"
   (destructuring-bind
     (&key (output *standard-output*)
           (prefix    nil)
-          (postfix   nil)
+          (postfix   #\Newline)
           (separator #\Newline))
     opts
     (format output
