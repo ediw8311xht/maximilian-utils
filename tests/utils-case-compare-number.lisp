@@ -85,3 +85,11 @@
               (1 :one)
               (2 :two)
               ((< 0) :negative)))))
+
+(test or-number 
+  "Verifying \"or\" works"
+  (is (eq :matched
+          (case-compare-number 4
+            (6 :no)
+            ((or 1 2 3 4 5) :matched)
+            (t :no)))))

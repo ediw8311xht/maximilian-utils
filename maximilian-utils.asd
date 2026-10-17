@@ -9,7 +9,14 @@
   :components (
                (:module "utils"
                 :components ((:file "package")
-                             (:file "functions")  
+
+                             ;; functions
+                             (:file "misc")
+                             (:file "time")
+                             (:file "predicates")
+                             (:file "string-manipulation")
+
+                             ;; macros
                              (:file "macros")
                              (:file "memoize")
                              ))

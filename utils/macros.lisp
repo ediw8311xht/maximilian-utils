@@ -21,6 +21,11 @@
   (defun remove-options (options to-remove)
     (delete-if (lambda (opt) (find (car opt) to-remove))
                options))
+  (defun case-compare-parse-car (l)
+    (case (car l)
+      
+      )
+    )
   )
 
 (defmacro defstruct-with-helpers (name-and-options &body body)
@@ -183,7 +188,9 @@ example:
                  collect (cond
                            ; eval with function
                            ((consp check)
-                            `((,(car check)  ,g-number-form ,@(cdr check)) ,@form))
+                            (if (eq (car check) 'cl:or)
+                               `((member ,g-number-form (list ,@(cdr check))) ,@form)
+                               `((,(car check)  ,g-number-form ,@(cdr check)) ,@form)))
                            ; t otherwise handling
                            ((member check '(t otherwise))
                             `(t ,@form))

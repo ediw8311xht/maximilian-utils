@@ -9,6 +9,7 @@
         ;(g-body-value   (gensym))
         )
     `(let ((,g-htable (make-hash-table :test #'equal)))
+       (defun ,(join-symbols "-" 'clear name) () (clrhash ,g-htable))
        (defun ,name (&rest ,g-rest)
          (multiple-value-bind
            (,g-table-value ,g-table-got) (gethash ,g-rest ,g-htable)
