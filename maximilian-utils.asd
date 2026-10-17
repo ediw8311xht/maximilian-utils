@@ -27,7 +27,8 @@
                )
 
   :description "some utilities"
-  :in-order-to ((test-op (test-op "maximilian-utils/tests"))))
+  :in-order-to ((test-op (test-op "maximilian-utils/tests")))
+  )
 
 (asdf:defsystem #:maximilian-utils/tests
   :depends-on (
@@ -40,11 +41,15 @@
   :components ((:module "tests"
                 :components (
                              (:file "package")
+                             (:file "main")
                              (:file "utils")
                              (:file "utils-split-chars")
                              (:file "utils-memoize")
                              (:file "utils-case-compare-number")
+                             (:file "utils-macros")
                              (:file "data-structures")
                              )))
   :description "Testing maximilian-utils"
-  :perform (test-op (o c) (symbol-call :fiveam '#:run-all-tests)))
+  :perform (test-op (o c) (uiop:symbol-call :fiveam :run!
+                                            (uiop:find-symbol* :main-suite :maximilian-utils/tests)))
+  )

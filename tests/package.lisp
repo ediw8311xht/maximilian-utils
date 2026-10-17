@@ -5,5 +5,9 @@
         :maximilian-utils.queue
         :fiveam
         )
-  )
+  (:export #:main-suite
+           #:util-suite
+           #:macros-suite
+           #:data-structure-suite
+           ))
 

@@ -1,7 +1,9 @@
+
 (in-package :maximilian-utils/tests)
 
 (def-suite case-compare-number-suite
-  :description "Test suite for case-compare-number macro.")
+  :description "Test suite for case-compare-number macro."
+  :in utils-suite)
 (in-suite case-compare-number-suite)
 
 (test exact-number-matching

@@ -1,8 +1,7 @@
 
 (in-package :maximilian-utils/tests)
 
-(def-suite :data-structures-test
+(def-suite data-structures-suite
   :description "data-structures testing"
-  )
-
-(in-suite :data-structures-test)
+  :in main-suite)
+(in-suite data-structures-suite)
