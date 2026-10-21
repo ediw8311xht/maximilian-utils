@@ -24,17 +24,11 @@
 
   )
 
-(defmacro defclass-with-helpers (name-and-options (&rest super-classes) (&rest slots) &body options)
-
-  (destructuring-bind
-    (name &key
-          export
-          with-value
-          (value-name 'value)
-          (conc-name   name))
-    (if (consp name-and-options)
-        name-and-options
-        (list name-and-options))
+(defmacro defclass-with-helpers ((name &key export
+                                       with-value
+                                       (value-name 'value)
+                                       (conc-name name))
+                                 (&rest super-classes) (&rest slots) &body options)
 
     (let* ((fn-list   '()) ; functions to define
            (to-export '()) ; symbols to export
@@ -60,4 +54,4 @@
             ;`(export ',(reverse to-export))
             `(export ',(reverse to-export)))
 
-         ))))
+         )))
