@@ -6,7 +6,7 @@
         :fiveam
         )
   (:export #:main-suite
-           #:util-suite
+           #:utils-suite
            #:macros-suite
            #:data-structure-suite
            ))

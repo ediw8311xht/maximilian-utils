@@ -1,10 +1,10 @@
 
 (in-package :maximilian-utils/tests)
 
-(def-suite macros-suite
+(def-suite struct-macros-suite
   :description "utils testing"
   :in utils-suite)
-(in-suite macros-suite)
+(in-suite struct-macros-suite)
 
 (defstruct-with-helpers (test-struct (:with-get-set slot))
   (a "init" :type string)

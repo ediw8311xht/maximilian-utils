@@ -3,7 +3,7 @@
   :description "Various utility functions and macros."
   :author "Maximilian Ballard"
   :license "GPLv3"
-  :version "2.1.3"
+  :version "2.2.0"
   :depends-on ("uiop")
   :serial t
   :components (
@@ -18,6 +18,8 @@
 
                              ;; macros
                              (:file "macros")
+                             (:file "struct-macros")
+                             (:file "clos-macros")
                              (:file "memoize")
                              ))
 
@@ -44,9 +46,10 @@
                              (:file "main")
                              (:file "utils")
                              (:file "utils-split-chars")
-                             (:file "utils-memoize")
                              (:file "utils-case-compare-number")
-                             (:file "utils-macros")
+                             (:file "utils-struct-macros")
+                             (:file "utils-clos-macros")
+                             (:file "utils-memoize")
                              (:file "data-structures")
                              )))
   :description "Testing maximilian-utils"

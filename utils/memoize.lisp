@@ -1,16 +1,20 @@
-(in-package :maximilian-utils)
 
+(in-package :maximilian-utils)
 
 (defmacro defun-memoize (name args &body body)
   (let ((g-htable       (gensym))
         (g-table-got    (gensym))
         (g-table-value  (gensym))
         (g-rest         (gensym))
+        (doc-string     (when (stringp (car body))
+                          (car body)))
         ;(g-body-value   (gensym))
         )
     `(let ((,g-htable (make-hash-table :test #'equal)))
        (defun ,(join-symbols "-" 'clear name) () (clrhash ,g-htable))
        (defun ,name (&rest ,g-rest)
+         ,(if doc-string doc-string
+              (format nil "lambda list: ~A" (cons name args)))
          (multiple-value-bind
            (,g-table-value ,g-table-got) (gethash ,g-rest ,g-htable)
            (if ,g-table-got

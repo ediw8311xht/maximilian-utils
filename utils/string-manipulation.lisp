@@ -1,3 +1,4 @@
+
 (in-package :maximilian-utils)
 
 #| strings, chars, and output |#
@@ -32,10 +33,26 @@
         (handle-first)))))
 
 (defun join (sep &rest rest)
-  (format nil (format nil "~~{~~A~~^~A~~}" sep) rest))
+  (if rest
+      (with-output-to-string (s)
+        (princ (car rest) s)
+        (loop for i in (cdr rest)
+              do (princ sep s)
+              (princ i s)))
+      ""))
 
 (defun join-symbols (sep &rest rest)
-  (intern (apply #'join sep rest)))
+  (when rest
+    (intern (apply #'join sep rest))))
+
+(defun join-symbols-package (sep package &rest rest)
+  (when rest
+    (intern (with-output-to-string (s)
+              (princ (string (car rest)) s)
+              (loop for i in (cdr rest)
+                    do (princ sep s)
+                    (princ (string i) s)))
+            package)))
 
 (defun split (split-str str &key (max-count nil) &aux (s (length split-str)))
   (labels
@@ -118,12 +135,12 @@
 
 (defun subseq-after (str character &key foundp from-end exclude-first sharedp)
   (let ((pos (position character str :from-end from-end)))
-    (if pos 
-        (let ((start (if exclude-first (+ pos 1) pos))) 
-          (if sharedp 
-              (make-array (- (length str) start) 
-                          :element-type 'character 
-                          :displaced-to str 
-                          :displaced-index-offset start)  
+    (if pos
+        (let ((start (if exclude-first (+ pos 1) pos)))
+          (if sharedp
+              (make-array (- (length str) start)
+                          :element-type 'character
+                          :displaced-to str
+                          :displaced-index-offset start)
               (subseq str start)))
         foundp)))

@@ -1,3 +1,4 @@
+
 (in-package :cl-user)
 (defpackage :maximilian-utils
   (:use :cl)
@@ -6,6 +7,7 @@
     ;; macros
     #:λ
     #:defstruct-with-helpers
+    #:defclass-with-helpers
     #:gethash-init
     #:bind-m
     #:bind-places
@@ -29,6 +31,7 @@
     #:get-leaves
     #:join
     #:join-symbols
+    #:join-symbols-package
     #:make-circular
     #:print-2d-array
     #:reduce-leaves
