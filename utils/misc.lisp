@@ -10,6 +10,11 @@
 
 (defun bool-val (v) (not (not v)))
 
+(defun create-plist (props &optional vals)
+  (loop for x in props
+        for y = (when vals (pop vals))
+        collect x collect y))
+
 (defun directory-recursive-files (path fn &key (max-depth nil))
   "Call function `fn` on all files within directories and subdirectories of `path`
   Limit depth of directory to recurse into using `max-depth` with 1 being direct directories of path."
@@ -17,7 +22,7 @@
     (error "Directory, '~A', couldn't be found." path))
   (when (and max-depth (or (not (integerp max-depth)) (< max-depth 0)))
     (error ":max-depth must be nil or a non-negative integer. passed value: ~A" max-depth))
-  (let ((path-length (- (length (pathname-directory path)) 1))) 
+  (let ((path-length (- (length (pathname-directory path)) 1)))
     (uiop:collect-sub*directories
       path
       (constantly t)
@@ -28,25 +33,6 @@
       (lambda (subdir)
         (mapc fn (uiop:directory-files subdir))))))
 
-(defun make-circular (l &key (sharedp nil))
-  (if sharedp
-      (and (setf (cdr (last l)) l) l)
-      (let ((n-l (copy-list l)))
-        (setf (cdr (last n-l)) n-l))))
-
-(defun return-nil (&rest rest)
-  (declare (ignore rest)) nil)
-
-(defun get-file-type (input-file)
-  (intern
-    (string-upcase (subseq-after input-file #\. :from-end t :exclude-first 1))
-    :keyword))
-
-(defun create-plist (props &optional vals)
-  (loop for x in props
-        for y = (when vals (pop vals))
-        collect x collect y))
-
 (defun format-combine (&optional s &rest rest)
   (if s
       (loop with arg with rest-args = rest
@@ -56,6 +42,20 @@
             collect arg into args
             finally (return (values (apply #'format nil s args) rest-args)))
       ""))
+
+(defun get-file-type (input-file)
+  (intern
+    (string-upcase (subseq-after input-file #\. :from-end t :exclude-first 1))
+    :keyword))
+
+(defun make-circular (l &key (sharedp nil))
+  (if sharedp
+      (and (setf (cdr (last l)) l) l)
+      (let ((n-l (copy-list l)))
+        (setf (cdr (last n-l)) n-l))))
+
+(defun return-nil (&rest rest)
+  (declare (ignore rest)) nil)
 
 (defun show-structure (var &key (level 1)
                            (max-level 5)
@@ -82,6 +82,7 @@
                 do (show-structure i :level level :indent-size indent-size :output-func output-func :output-stream output-stream)))
         (t nil)))))
 
+#| ----------leaves---------- |#
 (defun reduce-leaves (func input-data
                            &key
                            (key #'identity)
@@ -119,4 +120,3 @@
 (defun count-leaves (input-data)
   "Returns numbers of atoms in data structure and nested data structures."
   (reduce-leaves #'+ input-data :key (lambda (x) (if x 1 0))))
-

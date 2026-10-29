@@ -4,20 +4,24 @@
   (:use :cl)
   (:nicknames :max-utils)
   (:export
-    ;; macros
+    #|----------macros-------------|#
     #:λ
-    #:defstruct-with-helpers
-    #:defclass-with-helpers
     #:gethash-init
     #:bind-m
     #:bind-places
-    #:defun-memoize
     #:pipe
     #:pipe-arrow
     #:case-compare-number
+    #:multf
+    #:powf
+    ;; memoize
+    #:defun-memoize
+    ;; struct macros
+    #:defstruct-with-helpers
+    ;; clos macros
+    #:defclass-with-helpers
 
-    ;; functions
-    #:alistp
+    #|----------functions----------|#
     #:assoc-val
     #:bind
     #:bool-val
@@ -46,6 +50,9 @@
     #:string-to-symbol
     #:subseq-after
     #:substr-count
+    ;;predicates
+    #:alistp
+    ;; time functions
     #:timestamp-to-ntp
     #:utc-alist
     #:utc-format

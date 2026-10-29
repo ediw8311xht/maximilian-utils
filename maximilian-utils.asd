@@ -3,34 +3,27 @@
   :description "Various utility functions and macros."
   :author "Maximilian Ballard"
   :license "GPLv3"
-  :version "2.2.0"
+  :version "2.2.1"
   :depends-on ("uiop")
   :serial t
-  :components (
-               (:module "utils"
+  :components ((:module "utils"
                 :components ((:file "package")
-
                              ;; functions
                              (:file "misc")
                              (:file "time")
                              (:file "predicates")
                              (:file "string-manipulation")
-
                              ;; macros
                              (:file "macros")
                              (:file "struct-macros")
                              (:file "clos-macros")
-                             (:file "memoize")
-                             ))
-
+                             (:file "memoize")))
                (:module "data-structures"
                 :components ((:file "package")
-                             (:file "queue")))
-               )
+                             (:file "queue"))))
 
   :description "some utilities"
-  :in-order-to ((test-op (test-op "maximilian-utils/tests")))
-  )
+  :in-order-to ((test-op (test-op "maximilian-utils/tests"))))
 
 (asdf:defsystem #:maximilian-utils/tests
   :depends-on (
@@ -41,8 +34,7 @@
                )
   :serial t
   :components ((:module "tests"
-                :components (
-                             (:file "package")
+                :components ((:file "package")
                              (:file "main")
                              (:file "utils")
                              (:file "utils-split-chars")
@@ -50,9 +42,7 @@
                              (:file "utils-struct-macros")
                              (:file "utils-clos-macros")
                              (:file "utils-memoize")
-                             (:file "data-structures")
-                             )))
+                             (:file "data-structures"))))
   :description "Testing maximilian-utils"
   :perform (test-op (o c) (uiop:symbol-call :fiveam :run!
-                                            (uiop:find-symbol* :main-suite :maximilian-utils/tests)))
-  )
+                                            (uiop:find-symbol* :main-suite :maximilian-utils/tests))))

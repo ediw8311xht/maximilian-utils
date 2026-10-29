@@ -93,4 +93,11 @@ example:
                            ; var/number handling
                            (t `((= ,check ,g-number-form) ,@form))))))))
 
+
+(defmacro multf (place number)
+  `(setf ,place (* ,place ,number)))
+
+(defmacro powf (place power)
+  `(setf ,place (expt ,place ,power)))
+
 ;(defmacro deconstruction-bind-special )
